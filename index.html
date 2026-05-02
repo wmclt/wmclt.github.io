@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dutch Article Trainer</title>
+    <style>
+        /* --- CSS STYLING --- */
+        
+        :root {
+            --bg-color: #f4f4f9;
+            --text-color: #333;
+            --btn-bg: #fff;
+            --btn-border: #ddd;
+            --flash-green: rgba(76, 175, 80, 0.4);
+            --flash-red: rgba(244, 67, 54, 0.4);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Prevent scrolling */
+            transition: background-color 0.2s ease;
+        }
+
+        /* The container for the game elements */
+        .game-container {
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        /* Top Right Control Panel (Score + Reset) */
+        .top-controls {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .score-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #666;
+        }
+
+        /* The Reset Button */
+        .reset-btn {
+            background-color: transparent;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: underline;
+            padding: 5px;
+            transition: color 0.2s;
+        }
+
+        .reset-btn:hover {
+            color: #666;
+        }
+
+        /* The main word display */
+        .word-display {
+            font-size: 4rem;
+            margin-bottom: 50px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        /* Button container */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* The buttons themselves */
+        button.game-btn {
+            background-color: var(--btn-bg);
+            border: 2px solid var(--btn-border);
+            color: #333;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        button.game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #bbb;
+        }
+
+        button.game-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* --- FLASH ANIMATIONS --- */
+        
+        .flash-green {
+            background-color: var(--flash-green) !important;
+        }
+
+        .flash-red {
+            background-color: var(--flash-red) !important;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Top Right Controls -->
+    <div class="top-controls">
+        <div class="score-display" id="score"></div>
+        <button class="reset-btn" onclick="clearScore()">Clear</button>
+    </div>
+
+    <!-- Main Game Area -->
+    <div class="game-container">
+        <h1 class="word-display" id="word">Loading...</h1>
+        
+        <div class="button-group">
+            <button class="game-btn" onclick="handleChoice('de')">de</button>
+            <button class="game-btn" onclick="handleChoice('het')">het</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT LOGIC --- */
+
+        // 1. DATA SETUP
+        // Replace the items below with your actual list of words later!
+        const wordList = [
+            { word: "tafel", article: "de" },
+            { word: "huis", article: "het" },
+            { word: "auto", article: "de" },
+            { word: "boek", article: "het" },
+            { word: "stoel", article: "de" },
+            { word: "bed", article: "het" },
+            { word: "fiets", article: "de" }
+        ];
+
+        // 2. STATE VARIABLES
+        let currentWordIndex = -1;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        
+        // DOM Elements
+        const wordEl = document.getElementById('word');
+        const scoreEl = document.getElementById('score');
+        const bodyEl = document.body;
+
+        // 3. HELPER FUNCTIONS
+        
+        // Shuffle array (Fisher-Yates algorithm) to randomize order
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Update the score display in top right
+        function updateScoreDisplay() {
+            const total = correctCount + incorrectCount;
+            if (total === 0) {
+                scoreEl.textContent = "0 / 0";
+            } else {
+                scoreEl.textContent = `${correctCount} / ${total}`;
+            }
+        }
+
+        // Save scores to localStorage
+        function saveScore() {
+            const data = {
+                correct: correctCount,
+                incorrect: incorrectCount
+            };
+            localStorage.setItem('dutchTrainerStats', JSON.stringify(data));
+        }
+
+        // Load scores from localStorage
+        function loadScore() {
+            const savedData = localStorage.getItem('dutchTrainerStats');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    correctCount = data.correct || 0;
+                    incorrectCount = data.incorrect || 0;
+                } catch (e) {
+                    console.error("Error loading saved score:", e);
+                }
+            }
+        }
+
+        // Clear scores from localStorage and reset counters
+        function clearScore() {
+            correctCount = 0;
+            incorrectCount = 0;
+            localStorage.removeItem('dutchTrainerStats');
+            updateScoreDisplay();
+        }
+
+        // 4. CORE GAME FUNCTIONS
+
+        function loadNextWord() {
+            // If we run out of words, reshuffle and start over (or stop)
+            if (currentWordIndex >= wordList.length - 1) {
+                shuffle(wordList);
+                currentWordIndex = 0;
+            } else {
+                currentWordIndex++;
+            }
+
+            const currentItem = wordList[currentWordIndex];
+            
+            // Update UI
+            wordEl.textContent = currentItem.word;
+            
+            // Reset background color just in case
+            bodyEl.style.backgroundColor = ''; 
+        }
+
+        function handleChoice(userChoice) {
+            const correctArticle = wordList[currentWordIndex].article;
+
+            if (userChoice === correctArticle) {
+                correctCount++;
+                flashScreen('green');
+            } else {
+                incorrectCount++;
+                flashScreen('red');
+            }
+
+            // Save to localStorage after each choice
+            saveScore();
+            
+            updateScoreDisplay();
+
+            // Wait a tiny bit for the user to see the color, then load next word
+            setTimeout(() => {
+                loadNextWord();
+            }, 250); // 250ms delay
+        }
+
+        function flashScreen(color) {
+            if (color === 'green') {
+                bodyEl.classList.add('flash-green');
+            } else {
+                bodyEl.classList.add('flash-red');
+            }
+
+            // Remove the class after animation finishes so it can trigger again next time
+            setTimeout(() => {
+                bodyEl.classList.remove('flash-green', 'flash-red');
+            }, 250);
+        }
+
+        // 5. INITIALIZATION
+        
+        function init() {
+            loadScore(); // Load saved scores from localStorage
+            updateScoreDisplay();
+            shuffle(wordList); // Randomize order on start
+            loadNextWord();
+        }
+
+        // Start the game when page loads
+        window.onload = init;
+
+    </script>
+</body>
+</html>
