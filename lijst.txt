@@ -124,7 +124,6 @@ de:indruk
 de:inhoud
 de:instelling
 de:invloed
-de:kaar
 de:kaart
 de:kabel
 de:kat
@@ -290,7 +289,6 @@ de:vloed
 de:vloer
 de:vloot
 de:vlucht
-de:voel
 de:voet
 de:vogel
 de:vork
@@ -319,7 +317,7 @@ de:zin
 de:zoeker
 de:zon
 de:zwaan
-de:zwaard
+het:zwaard
 het:adres
 het:afscheid
 het:antwoord

@@ -235,7 +235,10 @@
 
         // Clear scores from localStorage and reset counters
         function serveMadeErrors() {
-            const json = JSON.stringify([...madeErrors], null, 2);
+
+            const result = [...madeErrors].sort((a,b) => a.split(" ")[1] > b.split(" ")[1])
+
+            const json = JSON.stringify(result, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
