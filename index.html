@@ -55,6 +55,22 @@
         }
 
         /* The Reset Button */
+        .load-made-errors-btn {
+            background-color: transparent;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: underline;
+            padding: 5px;
+            transition: color 0.2s;
+        }
+
+        .load-made-errors-btn:hover {
+            color: #666;
+        }
+
+        /* The Reset Button */
         .reset-btn {
             background-color: transparent;
             border: none;
@@ -125,7 +141,8 @@
     <!-- Top Right Controls -->
     <div class="top-controls">
         <div class="score-display" id="score"></div>
-        <button class="reset-btn" onclick="clearScore()">Clear</button>
+        <button class="load-made-errors-btn" onclick="loadMadeErrors()">Laad gemaakte fouten</button>
+        <button class="reset-btn" onclick="clearScore()">Reset</button>
     </div>
 
     <!-- Main Game Area -->
@@ -140,6 +157,10 @@
 
     <script>
         /* --- JAVASCRIPT LOGIC --- */
+
+        // 0. 
+        // Create a Set
+        let madeErrors = new Set();
 
         // 1. DATA SETUP
         // Replace the items below with your actual list of words later!
@@ -180,16 +201,17 @@
         }
 
         // Save scores to localStorage
-        function saveScore() {
+        function saveUserData() {
             const data = {
                 correct: correctCount,
                 incorrect: incorrectCount
             };
             localStorage.setItem('dutchTrainerStats', JSON.stringify(data));
+            localStorage.setItem('madeErrors', JSON.stringify(madeErrors));
         }
 
         // Load scores from localStorage
-        function loadScore() {
+        function loadUserData() {
             const savedData = localStorage.getItem('dutchTrainerStats');
             if (savedData) {
                 try {
@@ -200,7 +222,35 @@
                     console.error("Error loading saved score:", e);
                 }
             }
+            const madeErrorsData = localStorage.getItem('madeErrors');
+            if(madeErrorsData) {
+                try {
+                    const tryMadeErrorsData = JSON.parse(madeErrorsData);
+                    madeErrors = new Set(JSON.parse(tryMadeErrorsData || []));
+                } catch (e) {
+                    console.error("Error loading saved score:", e);
+                }
+            }
         }
+
+        // Clear scores from localStorage and reset counters
+        function loadMadeErrors() {
+            const json = JSON.stringify(madeErrors, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'gemaaktse-fouten.json';
+            a.click();
+
+            URL.revokeObjectURL(url); // clean up
+        }
+
+        // Usage TODO needed?
+        // document.getElementById('my-button').addEventListener('click', () => {
+        //     downloadJson({ hello: 'world', count: 42 }, 'export.json');
+        // });
 
         // Clear scores from localStorage and reset counters
         function clearScore() {
@@ -239,10 +289,11 @@
             } else {
                 incorrectCount++;
                 flashScreen('red');
+                madeErrors.add(userChoice);
             }
 
             // Save to localStorage after each choice
-            saveScore();
+            saveUserData();
             
             updateScoreDisplay();
 
@@ -268,7 +319,7 @@
         // 5. INITIALIZATION
         
         // function init() {
-        //     loadScore(); // Load saved scores from localStorage
+        //     loadUserData(); // Load saved scores from localStorage
         //     updateScoreDisplay();
         //     shuffle(wordList); // Randomize order on start
         //     loadNextWord();
@@ -277,8 +328,9 @@
         async function init() {
             try {
                 const response = await fetch('lijst.txt');
-                wordList = await response.text(); // Format: ["de:tafel", "het:huis"]
-                loadScore();
+                const wordListText = await response.text(); // Format: ["de:tafel", "het:huis"]
+                wordList = wordListText.split("\n");
+                loadUserData();
                 updateScoreDisplay();
                 shuffle(wordList);
                 loadNextWord();
