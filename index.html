@@ -277,9 +277,7 @@
         async function init() {
             try {
                 const response = await fetch('lijst.txt');
-                console.log(response)
-                wordList = await response.text; // Format: ["de:tafel", "het:huis"]
-                console.log(wordList)
+                wordList = await response.text(); // Format: ["de:tafel", "het:huis"]
                 loadScore();
                 updateScoreDisplay();
                 shuffle(wordList);
