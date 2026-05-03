@@ -55,7 +55,7 @@
         }
 
         /* The Reset Button */
-        .load-made-errors-btn {
+        .serve-made-errors-btn {
             background-color: transparent;
             border: none;
             color: #999;
@@ -66,7 +66,7 @@
             transition: color 0.2s;
         }
 
-        .load-made-errors-btn:hover {
+        .serve-made-errors-btn:hover {
             color: #666;
         }
 
@@ -141,7 +141,7 @@
     <!-- Top Right Controls -->
     <div class="top-controls">
         <div class="score-display" id="score"></div>
-        <button class="load-made-errors-btn" onclick="loadMadeErrors()">Laad gemaakte fouten</button>
+        <button class="serve-made-errors-btn" onclick="serveMadeErrors()">Download gemaakte fouten</button>
         <button class="reset-btn" onclick="clearScore()">Reset</button>
     </div>
 
@@ -234,8 +234,8 @@
         }
 
         // Clear scores from localStorage and reset counters
-        function loadMadeErrors() {
-            const json = JSON.stringify(madeErrors, null, 2);
+        function serveMadeErrors() {
+            const json = JSON.stringify([...madeErrors], null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
@@ -281,6 +281,7 @@
         }
 
         function handleChoice(userChoice) {
+            const word = wordList[currentWordIndex].split(":")[1];
             const correctArticle = wordList[currentWordIndex].split(":")[0];
 
             if (userChoice === correctArticle) {
@@ -289,7 +290,7 @@
             } else {
                 incorrectCount++;
                 flashScreen('red');
-                madeErrors.add(userChoice);
+                madeErrors.add(correctArticle.toUpperCase() + " " + word);
             }
 
             // Save to localStorage after each choice
