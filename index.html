@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dutch Article Trainer</title>
+    <title>De of het?</title>
     <style>
         /* --- CSS STYLING --- */
         
@@ -143,15 +143,7 @@
 
         // 1. DATA SETUP
         // Replace the items below with your actual list of words later!
-        const wordList = [
-            { word: "tafel", article: "de" },
-            { word: "huis", article: "het" },
-            { word: "auto", article: "de" },
-            { word: "boek", article: "het" },
-            { word: "stoel", article: "de" },
-            { word: "bed", article: "het" },
-            { word: "fiets", article: "de" }
-        ];
+        let wordList = [];
 
         // 2. STATE VARIABLES
         let currentWordIndex = -1;
@@ -229,17 +221,17 @@
                 currentWordIndex++;
             }
 
-            const currentItem = wordList[currentWordIndex];
+            const currentItem = wordList[currentWordIndex].split(":");
             
             // Update UI
-            wordEl.textContent = currentItem.word;
+            wordEl.textContent = currentItem[1];
             
             // Reset background color just in case
             bodyEl.style.backgroundColor = ''; 
         }
 
         function handleChoice(userChoice) {
-            const correctArticle = wordList[currentWordIndex].article;
+            const correctArticle = wordList[currentWordIndex].split(":")[0];
 
             if (userChoice === correctArticle) {
                 correctCount++;
@@ -275,12 +267,29 @@
 
         // 5. INITIALIZATION
         
-        function init() {
-            loadScore(); // Load saved scores from localStorage
-            updateScoreDisplay();
-            shuffle(wordList); // Randomize order on start
-            loadNextWord();
+        // function init() {
+        //     loadScore(); // Load saved scores from localStorage
+        //     updateScoreDisplay();
+        //     shuffle(wordList); // Randomize order on start
+        //     loadNextWord();
+        // }
+
+        async function init() {
+            try {
+                const response = await fetch('lijst.txt');
+                console.log(response)
+                wordList = await response.text; // Format: ["de:tafel", "het:huis"]
+                console.log(wordList)
+                loadScore();
+                updateScoreDisplay();
+                shuffle(wordList);
+                loadNextWord();
+            } catch (error) {
+                console.error("Failed to load words:", error);
+            }
         }
+
+        window.onload = init;
 
         // Start the game when page loads
         window.onload = init;
