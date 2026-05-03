@@ -150,8 +150,8 @@
         <h1 class="word-display" id="word">Loading...</h1>
         
         <div class="button-group">
-            <button class="game-btn" onclick="handleChoice('de')">de</button>
-            <button class="game-btn" onclick="handleChoice('het')">het</button>
+            <button class="game-btn" onclick="handleChoice('de')">de<br>←</bd></button>
+            <button class="game-btn" onclick="handleChoice('het')">het<br>→</button>
         </div>
     </div>
 
@@ -316,6 +316,15 @@
                 bodyEl.classList.remove('flash-green', 'flash-red');
             }, 250);
         }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'h' || e.key === 'ArrowRight') {
+                handleChoice('het');
+            } 
+            if (e.key === 'd' || e.key === 'ArrowLeft') {
+                handleChoice('de');
+            }
+        });
 
         // 5. INITIALIZATION
         
