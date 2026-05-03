@@ -8,8 +8,6 @@ de:agenda
 de:alcohol
 de:alf
 de:ambtenaar
-de:amor
-de:anker
 de:antenne
 de:appel
 de:arbeid
@@ -23,12 +21,11 @@ de:bal
 de:bank
 de:baron
 de:basis
-de:bed
 de:beer
 de:berg
 de:beurs
 de:bibliotheek
-de:blik
+de:blik(=kijk)
 de:bloem
 de:bodem
 de:boer
@@ -38,7 +35,7 @@ de:boog
 de:boom
 de:boon
 de:boot
-de:bos
+de:bos(=verzameling)
 de:bouw
 de:brand
 de:brief
@@ -114,7 +111,6 @@ de:herfst
 de:hoed
 de:hoek
 de:hond
-de:hoofd
 de:hoop
 de:huid
 de:huis
@@ -129,7 +125,7 @@ de:kabel
 de:kat
 de:kerk
 de:klacht
-de:klanken
+de:klank
 de:kleur
 de:knie
 de:knoop
@@ -174,8 +170,6 @@ de:naald
 de:naam
 de:nacht
 de:neus
-de:niet
-de:nijl
 de:nood
 de:norm
 de:nota
@@ -187,11 +181,11 @@ de:ondernemer
 de:oorzaak
 de:opname
 de:orde
-de:pad
+de:pad(=kikkersoort)
 de:pan
 de:paus
 de:peer
-de:pennen
+de:pen
 de:plant
 de:plicht
 de:plof
@@ -239,7 +233,6 @@ de:speer
 de:spiegel
 de:spit
 de:spleet
-de:spook
 de:spoor
 de:spreuk
 de:staf
@@ -261,7 +254,7 @@ de:tank
 de:tempel
 de:tent
 de:term
-de:terug
+de:terugkeer
 de:thee
 de:tol
 de:tong
@@ -282,7 +275,6 @@ de:vaan
 de:val
 de:valk
 de:veer
-de:veld
 de:vlek
 de:vlieg
 de:vloed
@@ -317,9 +309,9 @@ de:zin
 de:zoeker
 de:zon
 de:zwaan
-het:zwaard
 het:adres
 het:afscheid
+het:anker
 het:antwoord
 het:bed
 het:bedrag
@@ -332,10 +324,10 @@ het:bestuur
 het:bewijs
 het:bezoek
 het:blad
-het:blik(verpakking)
+het:blik(=verpakking)
 het:bloed
 het:boek
-het:bos
+het:bos(=woud)
 het:brood
 het:cadeau
 het:café
@@ -427,7 +419,7 @@ het:internet
 het:jaar
 het:jaartal
 het:jack
-het:jong(vaneendier)
+het:jong
 het:journaal
 het:jubileum
 het:kabinet
@@ -460,7 +452,8 @@ het:leven
 het:legitimatiebewijs
 het:lichaam
 het:lichaamsdeel
-het:lichthet:lied
+het:licht
+het:lied
 het:lid
 het:lijf
 het:lijk
@@ -512,7 +505,7 @@ het:oosten
 het:oppervlak
 het:overhemd
 het:paard
-het:pad
+het:pad(=weggetje)
 het:pak
 het:paleis
 het:papier

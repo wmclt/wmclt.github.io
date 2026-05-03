@@ -135,6 +135,7 @@
         }
 
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
@@ -170,6 +171,7 @@
         let currentWordIndex = -1;
         let correctCount = 0;
         let incorrectCount = 0;
+        let streak = 0;
         
         // DOM Elements
         const wordEl = document.getElementById('word');
@@ -290,8 +292,13 @@
             if (userChoice === correctArticle) {
                 correctCount++;
                 flashScreen('green');
+                streak++;
+                if(streak == 10 || streak == 25 || streak == 50 || streak == 100){
+                    confetti();
+                }
             } else {
                 incorrectCount++;
+                streak = 0;
                 flashScreen('red');
                 madeErrors.add(correctArticle.toUpperCase() + " " + word);
             }
