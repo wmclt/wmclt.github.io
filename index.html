@@ -36,6 +36,7 @@
             width: 100%;
             max-width: 400px;
             padding: 20px;
+            box-sizing: border-box
         }
 
         /* Top Right Control Panel (Score + Reset) */
@@ -88,10 +89,11 @@
 
         /* The main word display */
         .word-display {
-            font-size: 4rem;
+            font-size: clamp(0.5rem, 8vw, 4rem);
             margin-bottom: 50px;
             font-weight: 700;
             letter-spacing: -1px;
+            text-align: center;
         }
 
         /* Button container */
@@ -134,6 +136,11 @@
             background-color: var(--flash-red) !important;
         }
 
+        /* --- TEXT ANIMATIONS --- */
+        @keyframes riseAndFade {
+            0%   { opacity: 1; transform: translate(-50%, -50%); }
+            100% { opacity: 0; transform: translate(-50%, -150%); }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
@@ -143,7 +150,7 @@
     <div class="top-controls">
         <div class="score-display" id="score"></div>
         <button class="serve-made-errors-btn" onclick="serveMadeErrors()">Download gemaakte fouten</button>
-        <button class="reset-btn" onclick="clearScore()">Reset</button>
+        <button class="reset-btn" onclick="resetData()">Reset</button>
     </div>
 
     <!-- Main Game Area -->
@@ -227,8 +234,7 @@
             const madeErrorsData = localStorage.getItem('madeErrors');
             if(madeErrorsData) {
                 try {
-                    const tryMadeErrorsData = JSON.parse(madeErrorsData);
-                    madeErrors = new Set(JSON.parse(tryMadeErrorsData || []));
+                    madeErrors = JSON.parse(madeErrorsData); // format:object {"DE eend":2}
                 } catch (e) {
                     console.error("Error loading saved score:", e);
                 }
@@ -237,16 +243,20 @@
 
         // Clear scores from localStorage and reset counters
         function serveMadeErrors() {
+            var prettyPrintedMadeErrors = 
+            Object.entries(madeErrors)
+                    .map(([key, value]) => `${key} : ${value} keer fout geantwoord`)
+                    .sort();
+            console.log(prettyPrintedMadeErrors);
 
-            const result = [...madeErrors].sort((a,b) => a.split(" ")[1] > b.split(" ")[1])
 
-            const json = JSON.stringify(result, null, 2);
+            const json = JSON.stringify(madeErrors, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'gemaaktse-fouten.json';
+            a.download = `de-het-fouten-${new Date().toISOString().slice(0, 19)}.json`;
             a.click();
 
             URL.revokeObjectURL(url); // clean up
@@ -258,10 +268,13 @@
         // });
 
         // Clear scores from localStorage and reset counters
-        function clearScore() {
+        function resetData() {
             correctCount = 0;
             incorrectCount = 0;
             localStorage.removeItem('dutchTrainerStats');
+            localStorage.removeItem('madeErrors');
+            madeErrors = {};
+            streak = 0;
             updateScoreDisplay();
         }
 
@@ -279,7 +292,13 @@
             const currentItem = wordList[currentWordIndex].split(":");
             
             // Update UI
-            wordEl.textContent = currentItem[1];
+            if(currentItem[1].includes("(")) {
+                var constituents = currentItem[1].split("(");
+                wordEl.textContent = constituents[0] + "\n(" + constituents[1];
+            }
+            else {
+                wordEl.textContent = currentItem[1];
+            }
             
             // Reset background color just in case
             bodyEl.style.backgroundColor = ''; 
@@ -295,12 +314,20 @@
                 streak++;
                 if(streak == 10 || streak == 25 || streak == 50 || streak == 100){
                     confetti();
+                    showFloatingText(`Al ${streak} vervolgend juist! 🎉`);
                 }
             } else {
                 incorrectCount++;
                 streak = 0;
                 flashScreen('red');
-                madeErrors.add(correctArticle.toUpperCase() + " " + word);
+                var correctAnswer = correctArticle.toUpperCase() + " " + word;
+                if(madeErrors.hasOwnProperty(correctAnswer)){ 
+                    madeErrors[correctAnswer]++;
+                }
+                else {
+                    madeErrors[correctAnswer] = 1;
+                }
+                localStorage.setItem('madeErrors', JSON.stringify(madeErrors));
             }
 
             // Save to localStorage after each choice
@@ -335,6 +362,25 @@
                 handleChoice('de');
             }
         });
+
+        function showFloatingText(text) {
+            const el = document.createElement('div');
+            el.textContent = text;
+            el.style.cssText = `
+                position: fixed;
+                top: 30%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: clamp(0.5rem, 8vw, 4rem);
+                font-weight: bold;
+                pointer-events: none;
+                animation: riseAndFade 3s ease-out forwards;
+                text-align: center;
+                text-align: center;
+            `;
+            document.body.appendChild(el);
+            el.addEventListener('animationend', () => el.remove());
+        }
 
         // 5. INITIALIZATION
         

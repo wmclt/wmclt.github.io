@@ -113,7 +113,6 @@ de:hoek
 de:hond
 de:hoop
 de:huid
-de:huis
 de:humor
 de:idee
 de:indruk
@@ -227,7 +226,7 @@ de:sleutel
 de:smaak
 de:smid
 de:soep
-de:soort
+de:soort(dier)
 de:spanning
 de:speer
 de:spiegel
