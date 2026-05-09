@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>De of het?</title>
     <style>
         /* --- CSS STYLING --- */
-        
         :root {
             --bg-color: #f4f4f9;
             --text-color: #333;
@@ -26,7 +26,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* Prevent scrolling */
+            overflow: hidden;
+            /* Prevent scrolling */
             transition: background-color 0.2s ease;
         }
 
@@ -36,7 +37,9 @@
             width: 100%;
             max-width: 400px;
             padding: 20px;
-            box-sizing: border-box
+            box-sizing: border-box;
+            transition: opacity 0.3s ease;
+            /* Smooth transition when switching views */
         }
 
         /* Top Right Control Panel (Score + Reset) */
@@ -47,6 +50,8 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            z-index: 10;
+            /* Ensure controls stay on top */
         }
 
         .score-display {
@@ -55,20 +60,24 @@
             color: #666;
         }
 
-        /* The Reset Button */
+        /* --- UPDATED BUTTON STYLING --- */
         .serve-made-errors-btn {
-            background-color: transparent;
+            background-color: #e0e0e0;
+            /* Light grey background */
             border: none;
-            color: #999;
+            color: #333;
             cursor: pointer;
-            font-size: 0.8rem;
-            text-decoration: underline;
-            padding: 5px;
-            transition: color 0.2s;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 25px;
+            /* Rounded box look */
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .serve-made-errors-btn:hover {
-            color: #666;
+            background-color: #d0d0d0;
+            transform: translateY(-1px);
         }
 
         /* The Reset Button */
@@ -113,12 +122,12 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.1s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
         button.game-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-color: #bbb;
         }
 
@@ -127,7 +136,6 @@
         }
 
         /* --- FLASH ANIMATIONS --- */
-        
         .flash-green {
             background-color: var(--flash-green) !important;
         }
@@ -138,56 +146,129 @@
 
         /* --- TEXT ANIMATIONS --- */
         @keyframes riseAndFade {
-            0%   { opacity: 1; transform: translate(-50%, -50%); }
-            100% { opacity: 0; transform: translate(-50%, -150%); }
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -150%);
+            }
+        }
+
+        /* --- ERROR VIEW STYLES --- */
+        #error-view {
+            display: none;
+            /* Hidden by default */
+            text-align: left;
+            max-width: 600px;
+            overflow-y: auto;
+            max-height: 80vh;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .error-table th,
+        .error-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        .error-table th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .back-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .back-btn:hover {
+            background-color: #555;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
+
 <body>
+
 
     <!-- Top Right Controls -->
     <div class="top-controls">
         <div class="score-display" id="score"></div>
-        <button class="serve-made-errors-btn" onclick="serveMadeErrors()">Download gemaakte fouten</button>
+        <!-- Updated Button Text and Class -->
+        <button class="serve-made-errors-btn" onclick="showErrorView()">Bekijk Fouten</button>
         <button class="reset-btn" onclick="resetData()">Reset</button>
     </div>
 
+
     <!-- Main Game Area -->
-    <div class="game-container">
+    <div class="game-container" id="game-view">
         <h1 class="word-display" id="word">Loading...</h1>
-        
         <div class="button-group">
             <button class="game-btn" onclick="handleChoice('de')">ḏe<br>←</bd></button>
             <button class="game-btn" onclick="handleChoice('het')">ẖet<br>→</button>
         </div>
     </div>
 
+
+    <!-- New Error View Container -->
+    <div id="error-view">
+        <h2>Gemaakte Fouten</h2>
+        <p>Hieronder staan de woorden die je het vaakst fout hebt gedaan:</p>
+        <table class="error-table" id="errors-table-body">
+            <!-- Rows will be injected here by JS -->
+        </table>
+        <button class="back-btn" onclick="returnToGame()">Terug naar Spel</button>
+    </div>
+
+
     <script>
         /* --- JAVASCRIPT LOGIC --- */
 
         // 0. 
-        // Create a Set
-        let madeErrors = new Set();
+        // Create a Set (or Object for counting)
+        let madeErrors = {}; // Changed to object to store counts easily
+
 
         // 1. DATA SETUP
-        // Replace the items below with your actual list of words later!
         let wordList = [];
+
 
         // 2. STATE VARIABLES
         let currentWordIndex = -1;
         let correctCount = 0;
         let incorrectCount = 0;
         let streak = 0;
-        
+
         // DOM Elements
         const wordEl = document.getElementById('word');
         const scoreEl = document.getElementById('score');
         const bodyEl = document.body;
+        const gameView = document.getElementById('game-view');
+        const errorView = document.getElementById('error-view');
+
 
         // 3. HELPER FUNCTIONS
-        
-        // Shuffle array (Fisher-Yates algorithm) to randomize order
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -199,7 +280,6 @@
             return array;
         }
 
-        // Update the score display in top right
         function updateScoreDisplay() {
             const total = correctCount + incorrectCount;
             if (total === 0) {
@@ -209,17 +289,16 @@
             }
         }
 
-        // Save scores to localStorage
         function saveUserData() {
             const data = {
                 correct: correctCount,
                 incorrect: incorrectCount
             };
             localStorage.setItem('dutchTrainerStats', JSON.stringify(data));
+            // Store madeErrors as a stringified object
             localStorage.setItem('madeErrors', JSON.stringify(madeErrors));
         }
 
-        // Load scores from localStorage
         function loadUserData() {
             const savedData = localStorage.getItem('dutchTrainerStats');
             if (savedData) {
@@ -231,57 +310,77 @@
                     console.error("Error loading saved score:", e);
                 }
             }
+
+            // Load madeErrors
             const madeErrorsData = localStorage.getItem('madeErrors');
-            if(madeErrorsData) {
+            if (madeErrorsData) {
                 try {
-                    madeErrors = JSON.parse(madeErrorsData); // format:object {"DE eend":2}
+                    madeErrors = JSON.parse(madeErrorsData);
                 } catch (e) {
                     console.error("Error loading saved score:", e);
                 }
             }
         }
 
-        // Clear scores from localStorage and reset counters
-        function serveMadeErrors() {
-            var prettyPrintedMadeErrors = 
-            Object.entries(madeErrors)
-                    .map(([key, value]) => `${key} : ${value} keer fout geantwoord`)
-                    .sort();
-            console.log(prettyPrintedMadeErrors);
+        // --- NEW FUNCTION: Show Error View ---
+        function showErrorView() {
+            // 1. Prepare the data
+            const entries = Object.entries(madeErrors);
 
+            // 2. Sort by count (descending)
+            entries.sort((a, b) => b[1] - a[1]);
 
-            const json = JSON.stringify(madeErrors, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+            // 3. Generate Table HTML
+            const tableBody = document.getElementById('errors-table-body');
+            tableBody.innerHTML = `<thead><tr><th>Woord</th><th>Aantal Fouten</th></tr></thead>`;
 
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `de-het-fouten-${new Date().toISOString().slice(0, 19)}.json`;
-            a.click();
+            if (entries.length === 0) {
+                tableBody.innerHTML += `<tbody><tr><td colspan="2" style="text-align:center">Geen fouten gemaakt! 🎉</td></tr></tbody>`;
+            } else {
+                let rows = '';
+                entries.forEach(([word, count]) => {
+                    // Split the key back into Article + Word for display if needed, 
+                    // currently stored as "DE woord"
+                    const parts = word.split(" ");
+                    const article = parts[0];
+                    const noun = parts.slice(1).join(" ");
 
-            URL.revokeObjectURL(url); // clean up
+                    rows += `<tr>
+                        <td><strong>${article}</strong> ${noun}</td>
+                        <td style="color: #d32f2f; font-weight:bold;">${count}x</td>
+                    </tr>`;
+                });
+                tableBody.innerHTML += `<tbody>${rows}</tbody>`;
+            }
+
+            // 4. Switch Views
+            gameView.style.display = 'none';
+            errorView.style.display = 'block';
         }
 
-        // Usage TODO needed?
-        // document.getElementById('my-button').addEventListener('click', () => {
-        //     downloadJson({ hello: 'world', count: 42 }, 'export.json');
-        // });
+        function returnToGame() {
+            errorView.style.display = 'none';
+            gameView.style.display = 'block';
+        }
+
 
         // Clear scores from localStorage and reset counters
         function resetData() {
             correctCount = 0;
             incorrectCount = 0;
+            streak = 0;
+            madeErrors = {}; // Reset errors object
+
             localStorage.removeItem('dutchTrainerStats');
             localStorage.removeItem('madeErrors');
-            madeErrors = {};
-            streak = 0;
+
             updateScoreDisplay();
         }
+
 
         // 4. CORE GAME FUNCTIONS
 
         function loadNextWord() {
-            // If we run out of words, reshuffle and start over (or stop)
             if (currentWordIndex >= wordList.length - 1) {
                 shuffle(wordList);
                 currentWordIndex = 0;
@@ -290,18 +389,17 @@
             }
 
             const currentItem = wordList[currentWordIndex].split(":");
-            
+
             // Update UI
-            if(currentItem[1].includes("(")) {
+            if (currentItem[1].includes("(")) {
                 var constituents = currentItem[1].split("(");
                 wordEl.textContent = constituents[0] + "\n(" + constituents[1];
-            }
-            else {
+            } else {
                 wordEl.textContent = currentItem[1];
             }
-            
+
             // Reset background color just in case
-            bodyEl.style.backgroundColor = ''; 
+            bodyEl.style.backgroundColor = '';
         }
 
         function handleChoice(userChoice) {
@@ -312,7 +410,7 @@
                 correctCount++;
                 flashScreen('green');
                 streak++;
-                if(streak == 10 || streak == 25 || streak == 50 || streak == 100){
+                if (streak == 10 || streak == 25 || streak == 50 || streak == 100) {
                     confetti();
                     showFloatingText(`Al ${streak} vervolgend juist! 🎉`);
                 }
@@ -320,25 +418,22 @@
                 incorrectCount++;
                 streak = 0;
                 flashScreen('red');
+
+                // Track Error Logic
                 var correctAnswer = correctArticle.toUpperCase() + " " + word;
-                if(madeErrors.hasOwnProperty(correctAnswer)){ 
+                if (madeErrors.hasOwnProperty(correctAnswer)) {
                     madeErrors[correctAnswer]++;
-                }
-                else {
+                } else {
                     madeErrors[correctAnswer] = 1;
                 }
-                localStorage.setItem('madeErrors', JSON.stringify(madeErrors));
             }
 
-            // Save to localStorage after each choice
             saveUserData();
-            
             updateScoreDisplay();
 
-            // Wait a tiny bit for the user to see the color, then load next word
             setTimeout(() => {
                 loadNextWord();
-            }, 250); // 250ms delay
+            }, 250);
         }
 
         function flashScreen(color) {
@@ -348,7 +443,6 @@
                 bodyEl.classList.add('flash-red');
             }
 
-            // Remove the class after animation finishes so it can trigger again next time
             setTimeout(() => {
                 bodyEl.classList.remove('flash-green', 'flash-red');
             }, 250);
@@ -357,7 +451,7 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'h' || e.key === 'ArrowRight') {
                 handleChoice('het');
-            } 
+            }
             if (e.key === 'd' || e.key === 'ArrowLeft') {
                 handleChoice('de');
             }
@@ -376,38 +470,32 @@
                 pointer-events: none;
                 animation: riseAndFade 3s ease-out forwards;
                 text-align: center;
-                text-align: center;
             `;
             document.body.appendChild(el);
             el.addEventListener('animationend', () => el.remove());
         }
 
         // 5. INITIALIZATION
-        
-        // function init() {
-        //     loadUserData(); // Load saved scores from localStorage
-        //     updateScoreDisplay();
-        //     shuffle(wordList); // Randomize order on start
-        //     loadNextWord();
-        // }
-
         async function init() {
             try {
                 const response = await fetch('lijst.txt');
-                const wordListText = await response.text(); // Format: ["de:tafel", "het:huis"]
+                const wordListText = await response.text();
                 wordList = wordListText.split("\n");
+
                 loadUserData();
                 updateScoreDisplay();
                 shuffle(wordList);
                 loadNextWord();
             } catch (error) {
                 console.error("Failed to load words:", error);
+                // Fallback for testing if lijst.txt is missing
+                wordList = ["de:tafel", "het:huis"];
+                updateScoreDisplay();
+                shuffle(wordList);
+                loadNextWord();
             }
         }
 
-        window.onload = init;
-
-        // Start the game when page loads
         window.onload = init;
 
     </script>
