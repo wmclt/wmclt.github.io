@@ -385,6 +385,7 @@
 
             // Iterate through the error keys (e.g., "DE tafel")
             for (let key in madeErrors) {
+                if(madeErrors[key] === 1) continue;
                 // Normalize key: remove spaces and lowercase article for matching
                 const parts = key.split(" ");
                 const article = parts[0].toLowerCase();
