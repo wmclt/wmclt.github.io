@@ -246,9 +246,7 @@
         /* --- JAVASCRIPT LOGIC --- */
 
         // 0. 
-        // Create a Set (or Object for counting)
-        let madeErrors = {}; // Changed to object to store counts easily
-
+        let madeErrors = {};
 
         // 1. DATA SETUP
         let wordList = [];
@@ -378,6 +376,44 @@
         }
 
 
+        // --- NEW FUNCTION: Prioritize Errors in Word List ---
+        function prioritizeErrors() {
+            if (Object.keys(madeErrors).length === 0) return;
+
+            // Create a list of words that need to be prioritized
+            let priorityWords = [];
+
+            // Iterate through the error keys (e.g., "DE tafel")
+            for (let key in madeErrors) {
+                // Normalize key: remove spaces and lowercase article for matching
+                const parts = key.split(" ");
+                const article = parts[0].toLowerCase();
+                const noun = parts.slice(1).join(" ").trim();
+
+                // Try to find the exact match in wordList (e.g., "de:tafel")
+                const foundIndex = wordList.findIndex(item => {
+                    const [storedArticle, storedNoun] = item.split(":");
+                    return storedArticle === article && storedNoun.trim() === noun;
+                });
+
+                if (foundIndex !== -1) {
+                    // If found in list, add to priority and remove from main list temporarily
+                    priorityWords.push(wordList[foundIndex]);
+                    wordList.splice(foundIndex, 1);
+                } else {
+                    // Fallback: reconstruct the string if it's not in the current list.txt (e.g. old errors)
+                    priorityWords.push(`${article}:${noun}`);
+                }
+            }
+
+            // Shuffle only the remaining words (the ones you got right or haven't seen yet)
+            shuffle(wordList);
+
+            // Put the error words at the very front of the array
+            wordList = [...priorityWords, ...wordList];
+        }
+
+
         // 4. CORE GAME FUNCTIONS
 
         function loadNextWord() {
@@ -484,14 +520,21 @@
 
                 loadUserData();
                 updateScoreDisplay();
-                shuffle(wordList);
+
+                // --- NEW LOGIC HERE ---
+                // 1. Prioritize errors (moves them to the top of the list)
+                prioritizeErrors();
+
+                // Note: We do NOT shuffle again here, because prioritizeErrors already shuffled 
+                // the non-error words and put error words at index 0.
+
                 loadNextWord();
             } catch (error) {
                 console.error("Failed to load words:", error);
                 // Fallback for testing if lijst.txt is missing
                 wordList = ["de:tafel", "het:huis"];
                 updateScoreDisplay();
-                shuffle(wordList);
+                prioritizeErrors();
                 loadNextWord();
             }
         }
