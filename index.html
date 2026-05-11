@@ -376,42 +376,32 @@
         }
 
 
-        // --- NEW FUNCTION: Prioritize Errors in Word List ---
+        // --- UPDATED FUNCTION: Prioritize Errors in Word List ---
         function prioritizeErrors() {
-            if (Object.keys(madeErrors).length === 0) return;
-
-            // Create a list of words that need to be prioritized
-            let priorityWords = [];
-
-            // Iterate through the error keys (e.g., "DE tafel")
-            for (let key in madeErrors) {
-                if(madeErrors[key] === 1) continue;
-                // Normalize key: remove spaces and lowercase article for matching
-                const parts = key.split(" ");
-                const article = parts[0].toLowerCase();
-                const noun = parts.slice(1).join(" ").trim();
-
-                // Try to find the exact match in wordList (e.g., "de:tafel")
-                const foundIndex = wordList.findIndex(item => {
-                    const [storedArticle, storedNoun] = item.split(":");
-                    return storedArticle === article && storedNoun.trim() === noun;
-                });
-
-                if (foundIndex !== -1) {
-                    // If found in list, add to priority and remove from main list temporarily
-                    priorityWords.push(wordList[foundIndex]);
-                    wordList.splice(foundIndex, 1);
-                } else {
-                    // Fallback: reconstruct the string if it's not in the current list.txt (e.g. old errors)
-                    priorityWords.push(`${article}:${noun}`);
-                }
-            }
-
-            // Shuffle only the remaining words (the ones you got right or haven't seen yet)
+            // 1. Always shuffle the list first to ensure randomness for non-error words
             shuffle(wordList);
 
-            // Put the error words at the very front of the array
-            wordList = [...priorityWords, ...wordList];
+            let errorItems = [];
+            let otherItems = [];
+
+            // 2. Separate items into errors and others based on madeErrors keys
+            wordList.forEach(item => {
+                const [article, noun] = item.split(":");
+                // Normalize for comparison (e.g., "DE tafel" vs "de:tafel")
+                const errorKey = article.toUpperCase() + " " + noun.trim();
+
+                if (madeErrors.hasOwnProperty(errorKey)) {
+                    errorItems.push(item);
+                } else {
+                    otherItems.push(item);
+                }
+            });
+
+            // 3. Shuffle the error items among themselves so they don't always appear in same order
+            shuffle(errorItems);
+
+            // 4. Combine: Errors first, then shuffled rest
+            wordList = [...errorItems, ...otherItems];
         }
 
 
@@ -522,12 +512,8 @@
                 loadUserData();
                 updateScoreDisplay();
 
-                // --- NEW LOGIC HERE ---
-                // 1. Prioritize errors (moves them to the top of the list)
+                // Prioritize errors (moves them to the top of the list) AND shuffles everything else
                 prioritizeErrors();
-
-                // Note: We do NOT shuffle again here, because prioritizeErrors already shuffled 
-                // the non-error words and put error words at index 0.
 
                 loadNextWord();
             } catch (error) {
@@ -544,4 +530,5 @@
 
     </script>
 </body>
+
 </html>
