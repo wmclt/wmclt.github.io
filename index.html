@@ -386,7 +386,7 @@
 
             // 2. Separate items into errors and others based on madeErrors keys
             wordList.forEach(item => {
-                if(item === "") continue;
+                if(item === "") return;
                 const [article, noun] = item.split(":");
                 // Normalize for comparison (e.g., "DE tafel" vs "de:tafel")
                 const errorKey = article.toUpperCase() + " " + noun.trim();
