@@ -1037,7 +1037,6 @@ het:land
 het:landschap
 het:lawaai
 het:leed
-het:lef
 het:leger
 het:legitimatiebewijs
 het:leven
