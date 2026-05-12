@@ -616,7 +616,6 @@ de:speer
 de:spiegel
 de:spit
 de:spleet
-de:spoor
 de:sport
 de:spreuk
 de:staart
@@ -1202,6 +1201,7 @@ het:spek
 het:spel
 het:spitsuur
 het:spook
+het:spoor
 het:sportveld
 het:spreekwoord
 het:spul
