@@ -257,7 +257,6 @@ de:heuvel
 de:hitte
 de:hoed
 de:hoek
-de:hoer
 de:hond
 de:honger
 de:hoofdpijn
@@ -569,7 +568,6 @@ de:schande
 de:schat
 de:schedel
 de:schijn
-de:schilder
 de:schoen
 de:schoft
 de:schok
@@ -1124,7 +1122,6 @@ het:pak
 het:paleis
 het:papier
 het:paradijs
-het:pardon
 het:parfum
 het:park
 het:parlement
