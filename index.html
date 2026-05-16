@@ -32,11 +32,9 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            /* Prevent scrolling */
             transition: background-color 0.2s ease;
         }
 
-        /* The container for the game elements */
         .game-container {
             text-align: center;
             width: 100%;
@@ -44,10 +42,8 @@
             padding: 20px;
             box-sizing: border-box;
             transition: opacity 0.3s ease;
-            /* Smooth transition when switching views */
         }
 
-        /* Top Right Control Panel (Score + Reset) */
         .top-controls {
             position: absolute;
             top: 20px;
@@ -56,7 +52,6 @@
             align-items: center;
             gap: 15px;
             z-index: 10;
-            /* Ensure controls stay on top */
         }
 
         .score-display {
@@ -65,17 +60,14 @@
             color: #666;
         }
 
-        /* --- UPDATED BUTTON STYLING --- */
         .serve-made-errors-btn {
             background-color: #e0e0e0;
-            /* Light grey background */
             border: none;
             color: #333;
             cursor: pointer;
             font-size: 0.9rem;
             padding: 8px 16px;
             border-radius: 25px;
-            /* Rounded box look */
             transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
@@ -85,7 +77,6 @@
             transform: translateY(-1px);
         }
 
-        /* The Reset Button */
         .reset-btn {
             background-color: transparent;
             border: none;
@@ -101,23 +92,77 @@
             color: #666;
         }
 
-        /* The main word display */
+        /* --- HAMBURGER MENU STYLES --- */
+        .menu-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 180px;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .menu-item {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #333;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
         .word-display {
             font-size: clamp(0.5rem, 8vw, 4rem);
             margin-bottom: 50px;
             font-weight: 700;
             letter-spacing: -1px;
             text-align: center;
+            white-space: pre-line;
         }
 
-        /* Button container */
         .button-group {
             display: flex;
             justify-content: center;
             gap: 20px;
         }
 
-        /* The buttons themselves */
         button.game-btn {
             background-color: var(--btn-bg);
             border: 2px solid var(--btn-border);
@@ -140,7 +185,6 @@
             transform: translateY(1px);
         }
 
-        /* --- FLASH ANIMATIONS --- */
         .flash-green {
             background-color: var(--flash-green) !important;
         }
@@ -149,23 +193,19 @@
             background-color: var(--flash-red) !important;
         }
 
-        /* --- TEXT ANIMATIONS --- */
         @keyframes riseAndFade {
             0% {
                 opacity: 1;
                 transform: translate(-50%, -50%);
             }
-
             100% {
                 opacity: 0;
                 transform: translate(-50%, -150%);
             }
         }
 
-        /* --- ERROR VIEW STYLES --- */
         #error-view {
             display: none;
-            /* Hidden by default */
             text-align: left;
             max-width: 600px;
             overflow-y: auto;
@@ -216,46 +256,48 @@
 
 <body>
 
-
     <!-- Top Right Controls -->
     <div class="top-controls">
         <div class="score-display" id="score"></div>
-        <!-- Updated Button Text and Class -->
         <button class="serve-made-errors-btn" onclick="showErrorView()">Bekijk Fouten</button>
         <button class="reset-btn" onclick="resetData()">Reset</button>
-    </div>
 
+        <!-- Hamburger Menu -->
+        <div class="menu-container">
+            <button class="hamburger-btn" onclick="toggleMenu()">☰</button>
+            <div class="dropdown-menu" id="dropdown-menu">
+                <button class="menu-item" id="mode-toggle-btn" onclick="toggleDieDatMode()">Wissel naar die/dat</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Game Area -->
     <div class="game-container" id="game-view">
         <h1 class="word-display" id="word">Loading...</h1>
         <div class="button-group">
-            <button class="game-btn" onclick="handleChoice('de')">ḏe<br>←</bd></button>
-            <button class="game-btn" onclick="handleChoice('het')">ẖet<br>→</button>
+            <button id="btn-de" class="game-btn" onclick="handleChoice('de')">de<br>←</button>
+            <button id="btn-het" class="game-btn" onclick="handleChoice('het')">het<br>→</button>
         </div>
     </div>
 
-
-    <!-- New Error View Container -->
+    <!-- Error View Container -->
     <div id="error-view">
         <h2>Gemaakte Fouten</h2>
         <p>Hieronder staan de woorden die je het vaakst fout hebt gedaan:</p>
         <table class="error-table" id="errors-table-body">
-            <!-- Rows will be injected here by JS -->
         </table>
         <button class="back-btn" onclick="returnToGame()">Terug naar Spel</button>
     </div>
 
-
     <script>
         /* --- JAVASCRIPT LOGIC --- */
 
-        // 0. 
+        // 0. STATE
         let madeErrors = {};
+        let dieDatMode = false; // New state variable
 
         // 1. DATA SETUP
         let wordList = [];
-
 
         // 2. STATE VARIABLES
         let currentWordIndex = -1;
@@ -270,35 +312,24 @@
         const gameView = document.getElementById('game-view');
         const errorView = document.getElementById('error-view');
 
-
         // 3. HELPER FUNCTIONS
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
                 randomIndex = Math.floor(Math.random() * currentIndex);
                 currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [
-                    array[randomIndex], array[currentIndex]];
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
             }
             return array;
         }
 
         function updateScoreDisplay() {
             const total = correctCount + incorrectCount;
-            if (total === 0) {
-                scoreEl.textContent = "0 / 0";
-            } else {
-                scoreEl.textContent = `${correctCount} / ${total}`;
-            }
+            scoreEl.textContent = total === 0 ? "0 / 0" : `${correctCount} / ${total}`;
         }
 
         function saveUserData() {
-            const data = {
-                correct: correctCount,
-                incorrect: incorrectCount
-            };
-            localStorage.setItem('dutchTrainerStats', JSON.stringify(data));
-            // Store madeErrors as a stringified object
+            localStorage.setItem('dutchTrainerStats', JSON.stringify({ correct: correctCount, incorrect: incorrectCount }));
             localStorage.setItem('madeErrors', JSON.stringify(madeErrors));
         }
 
@@ -309,31 +340,19 @@
                     const data = JSON.parse(savedData);
                     correctCount = data.correct || 0;
                     incorrectCount = data.incorrect || 0;
-                } catch (e) {
-                    console.error("Error loading saved score:", e);
-                }
+                } catch (e) { console.error("Error loading saved score:", e); }
             }
 
-            // Load madeErrors
             const madeErrorsData = localStorage.getItem('madeErrors');
             if (madeErrorsData) {
                 try {
                     madeErrors = JSON.parse(madeErrorsData);
-                } catch (e) {
-                    console.error("Error loading saved score:", e);
-                }
+                } catch (e) { console.error("Error loading saved errors:", e); }
             }
         }
 
-        // --- NEW FUNCTION: Show Error View ---
         function showErrorView() {
-            // 1. Prepare the data
-            const entries = Object.entries(madeErrors);
-
-            // 2. Sort by count (descending)
-            entries.sort((a, b) => b[1] - a[1]);
-
-            // 3. Generate Table HTML
+            const entries = Object.entries(madeErrors).sort((a, b) => b[1] - a[1]);
             const tableBody = document.getElementById('errors-table-body');
             tableBody.innerHTML = `<thead><tr><th>Woord</th><th>Aantal Fouten</th></tr></thead>`;
 
@@ -342,21 +361,14 @@
             } else {
                 let rows = '';
                 entries.forEach(([word, count]) => {
-                    // Split the key back into Article + Word for display if needed, 
-                    // currently stored as "DE woord"
                     const parts = word.split(" ");
                     const article = parts[0];
                     const noun = parts.slice(1).join(" ");
-
-                    rows += `<tr>
-                        <td><strong>${article}</strong> ${noun}</td>
-                        <td style="color: #d32f2f; font-weight:bold;">${count}x</td>
-                    </tr>`;
+                    rows += `<tr><td><strong>${article}</strong> ${noun}</td><td style="color: #d32f2f; font-weight:bold;">${count}x</td></tr>`;
                 });
                 tableBody.innerHTML += `<tbody>${rows}</tbody>`;
             }
 
-            // 4. Switch Views
             gameView.style.display = 'none';
             errorView.style.display = 'block';
         }
@@ -366,36 +378,25 @@
             gameView.style.display = 'block';
         }
 
-
-        // Clear scores from localStorage and reset counters
         function resetData() {
             correctCount = 0;
             incorrectCount = 0;
             streak = 0;
-            madeErrors = {}; // Reset errors object
-
+            madeErrors = {};
             localStorage.removeItem('dutchTrainerStats');
             localStorage.removeItem('madeErrors');
-
             updateScoreDisplay();
         }
 
-
-        // --- UPDATED FUNCTION: Prioritize Errors in Word List ---
         function prioritizeErrors() {
-            // 1. Always shuffle the list first to ensure randomness for non-error words
             shuffle(wordList);
-
             let errorItems = [];
             let otherItems = [];
 
-            // 2. Separate items into errors and others based on madeErrors keys
             wordList.forEach(item => {
-                if(item === "") return;
+                if (item === "") return;
                 const [article, noun] = item.split(":");
-                // Normalize for comparison (e.g., "DE tafel" vs "de:tafel")
                 const errorKey = article.toUpperCase() + " " + noun.trim();
-
                 if (madeErrors.hasOwnProperty(errorKey)) {
                     errorItems.push(item);
                 } else {
@@ -403,16 +404,59 @@
                 }
             });
 
-            // 3. Shuffle the error items among themselves so they don't always appear in same order
             shuffle(errorItems);
-
-            // 4. Combine: Errors first, then shuffled rest
             wordList = [...errorItems, ...otherItems];
         }
 
+        // --- NEW: HAMBURGER MENU & MODE TOGGLE ---
+        function toggleMenu() {
+            document.getElementById('dropdown-menu').classList.toggle('show');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.menu-container')) {
+                document.getElementById('dropdown-menu').classList.remove('show');
+            }
+        });
+
+        function toggleDieDatMode() {
+            dieDatMode = !dieDatMode;
+            document.getElementById('mode-toggle-btn').textContent = dieDatMode ? "Wissel naar de/het" : "Wissel naar die/dat";
+            updateGameButtons();
+            refreshCurrentWordDisplay();
+            toggleMenu();
+        }
+
+        function updateGameButtons() {
+            const btnDe = document.getElementById('btn-de');
+            const btnHet = document.getElementById('btn-het');
+            if (dieDatMode) {
+                btnDe.innerHTML = 'die<br>←';
+                btnHet.innerHTML = 'dat<br>→';
+            } else {
+                btnDe.innerHTML = 'de<br>←';
+                btnHet.innerHTML = 'het<br>→';
+            }
+        }
+
+        function refreshCurrentWordDisplay() {
+            if (currentWordIndex < 0 || currentWordIndex >= wordList.length) return;
+            const currentItem = wordList[currentWordIndex].split(":");
+            let displayText = currentItem[1];
+
+            if (displayText.includes("(")) {
+                const constituents = displayText.split("(");
+                displayText = constituents[0] + "\n(" + constituents[1];
+            }
+
+            if (dieDatMode) {
+                displayText = "een\n" + displayText;
+            }
+            wordEl.textContent = displayText;
+        }
 
         // 4. CORE GAME FUNCTIONS
-
         function loadNextWord() {
             if (currentWordIndex >= wordList.length - 1) {
                 shuffle(wordList);
@@ -422,16 +466,18 @@
             }
 
             const currentItem = wordList[currentWordIndex].split(":");
+            let displayText = currentItem[1];
 
-            // Update UI
-            if (currentItem[1].includes("(")) {
-                var constituents = currentItem[1].split("(");
-                wordEl.textContent = constituents[0] + "\n(" + constituents[1];
-            } else {
-                wordEl.textContent = currentItem[1];
+            if (displayText.includes("(")) {
+                const constituents = displayText.split("(");
+                displayText = constituents[0] + "\n(" + constituents[1];
             }
 
-            // Reset background color just in case
+            if (dieDatMode) {
+                displayText = "een\n" + displayText;
+            }
+
+            wordEl.textContent = displayText;
             bodyEl.style.backgroundColor = '';
         }
 
@@ -443,7 +489,7 @@
                 correctCount++;
                 flashScreen('green');
                 streak++;
-                if (streak == 10 || streak == 25 || streak == 50 || streak == 100) {
+                if ([10, 25, 50, 100].includes(streak)) {
                     confetti();
                     showFloatingText(`Al ${streak} opeenvolgend juist! 🎉`);
                 }
@@ -452,13 +498,8 @@
                 streak = 0;
                 flashScreen('red');
 
-                // Track Error Logic
                 var correctAnswer = correctArticle.toUpperCase() + " " + word;
-                if (madeErrors.hasOwnProperty(correctAnswer)) {
-                    madeErrors[correctAnswer]++;
-                } else {
-                    madeErrors[correctAnswer] = 1;
-                }
+                madeErrors[correctAnswer] = (madeErrors[correctAnswer] || 0) + 1;
             }
 
             saveUserData();
@@ -470,39 +511,24 @@
         }
 
         function flashScreen(color) {
-            if (color === 'green') {
-                bodyEl.classList.add('flash-green');
-            } else {
-                bodyEl.classList.add('flash-red');
-            }
-
+            bodyEl.classList.add(color === 'green' ? 'flash-green' : 'flash-red');
             setTimeout(() => {
                 bodyEl.classList.remove('flash-green', 'flash-red');
             }, 250);
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'h' || e.key === 'ArrowRight') {
-                handleChoice('het');
-            }
-            if (e.key === 'd' || e.key === 'ArrowLeft') {
-                handleChoice('de');
-            }
+            if (e.key === 'h' || e.key === 'ArrowRight') handleChoice('het');
+            if (e.key === 'd' || e.key === 'ArrowLeft') handleChoice('de');
         });
 
         function showFloatingText(text) {
             const el = document.createElement('div');
             el.textContent = text;
             el.style.cssText = `
-                position: fixed;
-                top: 30%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: clamp(0.5rem, 8vw, 4rem);
-                font-weight: bold;
-                pointer-events: none;
-                animation: riseAndFade 3s ease-out forwards;
-                text-align: center;
+                position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%);
+                font-size: clamp(0.5rem, 8vw, 4rem); font-weight: bold; pointer-events: none;
+                animation: riseAndFade 3s ease-out forwards; text-align: center;
             `;
             document.body.appendChild(el);
             el.addEventListener('animationend', () => el.remove());
@@ -517,10 +543,7 @@
 
                 loadUserData();
                 updateScoreDisplay();
-
-                // Prioritize errors (moves them to the top of the list) AND shuffles everything else
                 prioritizeErrors();
-
                 loadNextWord();
             } catch (error) {
                 console.error("Failed to load words:", error);
@@ -529,8 +552,6 @@
         }
 
         window.onload = init;
-
     </script>
 </body>
-
 </html>
